@@ -1,23 +1,30 @@
-import logo from './logo.svg';
+import { useContext } from 'react';
 import './App.css';
+import { UserContext } from './contexts/usersContext';
+import { Navigation } from './pages/Navigation';
+import { Route, Routes } from 'react-router-dom';
+import { LandingPage } from './pages/LandingPage';
+import { RegistrationPage } from './pages/RegistrationPage';
+import { LoginPage } from './pages/LoginPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { Dashboard } from './pages/Dashboard';
 
 function App() {
+  const { userInfo } = useContext(UserContext);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+    <div className="flex w-screen h-screen bg-base-200">
+      <header className="">
+        { userInfo?.token ? <Navigation/> : null }
       </header>
+      <main className='h-screen w-screen'>
+        <Routes>
+          <Route path='/' element={<LandingPage/>} />
+          <Route path='/register' element={<RegistrationPage/>} />
+          <Route path='/login' element={<LoginPage/>} />
+          <Route path='/profile' element={<ProfilePage/>} />
+          <Route path='/dashboard' element={<Dashboard/>} />
+        </Routes>
+      </main>
     </div>
   );
 }
