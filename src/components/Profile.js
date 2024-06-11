@@ -38,23 +38,43 @@ export const Profile = () => {
     }, [userInfo]);
 
     const navigate = useNavigate();
+    const maxSizeInBytes = 10 * 1024 * 1024
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
-
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setFormData({ ...formData, profile_img: file });
+        if (e.target.name === "profile_img") {
+            const file = e.target.files[0];
+    
+            if (file && file.size > maxSizeInBytes) {
+                console.log("File is too big!");
+                setMessage("File is too big. Please make sure your file does not exceed 3MB limit!");
+                return;
+            }
+    
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreview(reader.result);
+            reader.onload = () => {
+                const imageDataUrl = reader.result;
+                setFormData({ ...formData, profile_img: imageDataUrl });
+                setPreview(imageDataUrl);
             };
+    
             reader.readAsDataURL(file);
+        } else {
+            setFormData({ ...formData, [e.target.name]: e.target.value });
         }
     };
+    
+
+    // const handleFileChange = (e) => {
+    //     const file = e.target.files[0];
+    //     if (file) {
+    //         const reader = new FileReader();
+    //         reader.onloadend = () => {
+    //             setPreview(reader.result);
+    //             setFormData({ ...formData, profile_img: reader.result });
+    //         };
+    //         reader.readAsDataURL(file);
+    //     }
+    // };
 
     const handleEdit = () => {
         setIsEditing(true);
@@ -69,18 +89,17 @@ export const Profile = () => {
         updatedData.append('email', formData.email);
         updatedData.append('username', formData.username);
         updatedData.append('password', formData.password);
+        updatedData.append('profile_img', formData.profile_img);
 
-        if (formData.profile_img instanceof File) {
-            updatedData.append('profile_img', formData.profile_img);
-        }
-
-        console.log("Updated Data:", Array.from(updatedData.entries()));  // Log to check the data being sent
+        console.log("Updated Data:", Array.from(updatedData.entries()));
 
         try {
+            console.table(updatedData);
             await updateUserData(updatedData);
-            setIsEditing(false);
         } catch (error) {
             console.error("Error updating user profile:", error);
+        } finally {
+            setIsEditing(false);
         }
     };
 
@@ -112,7 +131,7 @@ export const Profile = () => {
     };
 
     const onBeforeFileLoad = (e) => {
-        if (e.target.files[0].size > 2000000) {
+        if (e.target.files[0].size > maxSizeInBytes) {
             alert("File is too big!");
             e.target.value = "";
         }
@@ -124,8 +143,8 @@ export const Profile = () => {
     };
 
     return (
-        <div className='m-auto w-full h-[90vh]'>
-            <article className='w-2/3 h-full bg-base-100 rounded-lg shadow-lg p-4 m-auto my-6'>
+        <div className='m-auto w-full h-[95%] '>
+            <article className='sm:w-2/3 h-full bg-base-100 rounded-lg shadow-lg p-4 md:m-auto my-16 md:my-6 mx-6'>
                 <div className='flex justify-between items-center p-2'>
                     <h3>My account</h3>
                     <div className="dropdown dropdown-end">
@@ -144,7 +163,7 @@ export const Profile = () => {
                             <div className='flex items-center justify-center gap-2 py-4'>
                                 <div className='w-1/3'>
                                     <AvatarEditor
-                                        image={formData.profile_img}
+                                        image={preview || formData.profile_img}
                                         width={140}
                                         height={140}
                                         border={10}
@@ -168,7 +187,7 @@ export const Profile = () => {
                                         type="file"
                                         name="profile_img"
                                         accept="image/*"
-                                        onChange={handleFileChange}
+                                        onChange={handleChange}
                                         className='bg-transparent w-3/5 appearance-none text-base-content/40 leading-tight focus:outline-none focus:shadow-outline'
                                     />
                                 </div>
@@ -232,26 +251,26 @@ export const Profile = () => {
                     </>
                 ) : (
                     <section className='flex flex-col justify-between gap-6'>
-                        <div className='flex flex-col items-center relative gap-4'>
+                        <div className='flex flex-col items-center relative gap-2'>
                             {userInfo && userInfo?.user && (
-                                <div className='flex justify-center items-center gap-2'>
+                                <div className='sm:flex justify-center items-center gap-6'>
                                     {userInfo?.user?.profile_img !== null ? (
-                                        <img src={userInfo.user.profile_img} alt={userInfo.user.firstname} className='object-cover w-32 h-32 shadow rounded-full' />
+                                        <img src={userInfo.user.profile_img} alt={userInfo.user.firstname} className='object-cover w-40 h-40 shadow rounded-[5%]' />
                                     ) : (
                                         <Avatar
                                             name={userInfo?.user?.username}
                                             src={userInfo.user.profile_img || null}
                                             size="140"
-                                            round="50%"
+                                            round="5%"
                                         />
                                     )}
                                     <div>
-                                        <h3 className='text-4xl font-semibold'><span>{userInfo?.user?.firstname.charAt(0).toUpperCase() + userInfo.user.firstname.substring(1)}</span> <span>{userInfo.user.lastname.charAt(0).toUpperCase() + userInfo.user.lastname.substring(1)}</span></h3>
-                                        <p className='text-sm mx-1'>join in <span className='font-semibold'>{moment(userInfo.user.created_at).format('MMMM Do YYYY')}</span></p>
+                                        <h3 className='text-3xl font-semibold'><span>{userInfo?.user?.firstname.charAt(0).toUpperCase() + userInfo.user.firstname.substring(1)}</span> <span>{userInfo.user.lastname.charAt(0).toUpperCase() + userInfo.user.lastname.substring(1)}</span></h3>
+                                        <p className='text-sm mx-1'>joined in <span className='font-semibold'>{moment(userInfo.user.created_at).format('MMMM Do YYYY')}</span></p>
                                     </div>
                                 </div>
                             )}
-                            <div className='flex flex-col justify-center items-center gap-2 my-6 text-lg bg-gradient-to-b from-[#0dbeba]/10 to-[#00fffb]/10 p-4 rounded-lg w-1/2'>
+                            <div className='flex flex-col justify-center items-center gap-2 my-6 text-lg bg-gradient-to-b from-[#0dbeba]/10 to-[#00fffb]/10 p-4 rounded-lg sm:w-1/2'>
                                 <h3 className='flex flex-col justify-start items-start self-start'>
                                     <p className='text-sm'>Your username</p>
                                     <p className='font-semibold mb-2'>{userInfo?.user?.username}</p>
@@ -259,6 +278,10 @@ export const Profile = () => {
                                 <h3 className='flex flex-col justify-start items-start self-start'>
                                     <p className='text-sm'>Email</p>
                                     <p className='font-semibold mb-2'>{userInfo?.user?.email}</p>
+                                </h3>
+                                <h3 className='flex flex-col justify-start items-start self-start'>
+                                    <p className='text-sm'>Password</p>
+                                    <p className='font-semibold mb-2'>{userInfo?.user?.password}</p>
                                 </h3>
                             </div>
                             <button onClick={handleEdit} className='flex justify-center items-center gap-1 bg-gradient-to-b from-[#0dbeba] to-[#00fffb] rounded-md my-2 py-1.5 hover:opacity-80 w-1/2'>Edit profile <span><TbUserEdit /></span></button>

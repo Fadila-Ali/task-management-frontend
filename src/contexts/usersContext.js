@@ -79,7 +79,7 @@ const UserProvider = ({ children }) => {
                 setErrorGettingUserData('User is not authenticated. Please login!');
             }
 
-            const response = await axios.patch(`${API}/users/${userInfo.user.id}`, userDataToUpdate, {
+            const response = await axios.put(`${API}/users/${userInfo.user.id}`, userDataToUpdate, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data',

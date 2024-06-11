@@ -13,6 +13,7 @@ import Avatar from 'react-avatar';
 export const Menu = () => {
     const { userInfo, logoutUser } = useContext(UserContext);
     const [activeLink, setActiveLink] = useState(localStorage.getItem('activeLink') || null);
+    const [mobileMenu, setMobileMenu] = useState(false);
     const [notificationCount, setNotificationCount] = useState(0);
 
     const navigate = useNavigate();
@@ -46,54 +47,92 @@ export const Menu = () => {
     };
 
     return (
-        <div className='w-24 h-screen bg-base-100 shadow-md flex flex-col justify-between items-center py-6'>
-            <section className='flex flex-col justify-between items-center'>
-                <div className="dropdown dropdown-right">
-                    <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                        <div className="w-10 rounded-full">
-                            {userInfo?.user?.profile_img ? (
-                                <img alt="profile" src={userInfo?.user?.profile_img} />
-                            ) : (
-                                <Avatar
-                                    name={userInfo?.user?.username}
-                                    size="40"
-                                    round="50%"
-                                />
-                            )}
+        <div>
+            <div className='w-24 h-screen bg-base-100 shadow-md hidden md:flex flex-col justify-between items-center py-6'>
+                <section className='flex flex-col justify-between items-center'>
+                    <div className="dropdown dropdown-right">
+                        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                            <div className="w-10 rounded-full">
+                                {userInfo?.user?.profile_img ? (
+                                    <img alt="profile" src={userInfo?.user?.profile_img} />
+                                ) : (
+                                    <Avatar
+                                        name={userInfo?.user?.username}
+                                        size="40"
+                                        round="50%"
+                                    />
+                                )}
+                            </div>
                         </div>
+                        <ul tabIndex={0} className="mr-4 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-md w-50">
+                            <li>
+                                <Link to={`/notifications`} className="justify-between rounded-md">
+                                    <MdOutlineNotifications /> Notifications
+                                    <span className="badge rounded-md bg-[#04d9ff] text-[#484444]">{notificationCount} new</span>
+                                </Link>
+                            </li>
+                            <li><Link to={`/profile`} className='rounded-md'><BiUser /> Profile</Link></li>
+                            <li><Link to={`/`} onClick={handleLogout} className='rounded-md'><BiLogOutCircle />Logout</Link></li>
+                        </ul>
                     </div>
-                    <ul tabIndex={0} className="mr-4 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-md w-50">
-                        <li>
-                            <Link to={`/notifications`} className="justify-between rounded-md">
-                                <MdOutlineNotifications /> Notifications
-                                <span className="badge rounded-md bg-[#04d9ff] text-[#484444]">{notificationCount} new</span>
-                            </Link>
-                        </li>
-                        <li><Link to={`/profile`} className='rounded-md'><BiUser /> Profile</Link></li>
-                        <li><Link to={`/`} onClick={handleLogout} className='rounded-md'><BiLogOutCircle />Logout</Link></li>
+                    <ul className="menu bg-base-100 rounded-md">
+                        {topMenuItems.map(item => (
+                            <li key={item.path} className={`tooltip tooltip-right pt-3`} data-tip={`${item.tooltip}`}>
+                                <button onClick={(e) => handleLinkClick(item.path, e)} className={`${activeLink === item.path ? 'bg-[#077]/20 text-[#077] rounded-md' : 'hover:bg-base-content/10 rounded-md'}`}>
+                                    <Link to={item.path} className='text-lg'>{item.icon}</Link>
+                                </button>
+                            </li>
+                        ))}
                     </ul>
-                </div>
-                <ul className="menu bg-base-100 rounded-md">
-                    {topMenuItems.map(item => (
-                        <li key={item.path} className={`tooltip tooltip-right pt-3`} data-tip={`${item.tooltip}`}>
-                            <button onClick={(e) => handleLinkClick(item.path, e)} className={`${activeLink === item.path ? 'bg-[#077]/20 text-[#077] rounded-md' : 'hover:bg-base-content/10 rounded-md'}`}>
-                                <Link to={item.path} className='text-lg'>{item.icon}</Link>
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </section>
-            <section>
-                <ul className="menu bg-base-100 rounded-md">
-                    {bottomMenuItems.map(item => (
-                        <li key={item.path} className={`tooltip tooltip-right pt-3`} data-tip={`${item.tooltip}`}>
-                            <button onClick={(e) => handleLinkClick(item.path, e)} className={`${activeLink === item.path ? 'bg-[#077]/20 text-[#077] rounded-md' : 'hover:bg-base-content/10 rounded-md'}`}>
-                                <Link to={item.path} className='text-lg'>{item.icon}</Link>
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </section>
+                </section>
+                <section>
+                    <ul className="menu bg-base-100 rounded-md">
+                        {bottomMenuItems.map(item => (
+                            <li key={item.path} className={`tooltip tooltip-right pt-3`} data-tip={`${item.tooltip}`}>
+                                <button onClick={(e) => handleLinkClick(item.path, e)} className={`${activeLink === item.path ? 'bg-[#077]/20 text-[#077] rounded-md' : 'hover:bg-base-content/10 rounded-md'}`}>
+                                    <Link to={item.path} className='text-lg'>{item.icon}</Link>
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            </div>
+            <div className="dropdown dropdown-left absolute md:hidden right-2 top-2">
+                        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                            <div className="w-10 rounded-full">
+                                {userInfo?.user?.profile_img ? (
+                                    <img alt="profile" src={userInfo?.user?.profile_img} />
+                                ) : (
+                                    <Avatar
+                                        name={userInfo?.user?.username}
+                                        size="40"
+                                        round="50%"
+                                    />
+                                )}
+                            </div>
+                        </div>
+                        <ul tabIndex={0} className="ml-4 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-md w-50">
+                            <li>
+                                <Link to={`/notifications`} className="justify-between rounded-md">
+                                    <MdOutlineNotifications /> Notifications
+                                    <span className="badge rounded-md bg-[#04d9ff] text-[#484444]">{notificationCount} new</span>
+                                </Link>
+                            </li>
+                            <li><Link to={`/profile`} className='rounded-md'><BiUser />Profile</Link></li>
+                            <li><Link to={`/settings`} className='rounded-md'><IoSettingsOutline /> Settings</Link></li>
+                            <li><Link to={`/about`} className='rounded-md'><GoQuestion />About</Link></li>
+                            <li><Link to={`/`} onClick={handleLogout} className='rounded-md'><BiLogOutCircle />Logout</Link></li>
+                        </ul>
+                    </div>
+                    <ul className="menu menu-horizontal bg-base-100 rounded-md absolute md:hidden bottom-0 w-full">
+                        {topMenuItems.map(item => (
+                            <li key={item.path} className={`tooltip tooltip-top px-2 py-3`} data-tip={`${item.tooltip}`}>
+                                <button onClick={(e) => handleLinkClick(item.path, e)} className={`${activeLink === item.path ? 'bg-[#077]/20 text-[#077] rounded-md' : 'hover:bg-base-content/10 rounded-md'}`}>
+                                    <Link to={item.path} className='text-lg'>{item.icon}</Link>
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
         </div>
     )
 }
